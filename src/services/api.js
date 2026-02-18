@@ -1,6 +1,7 @@
 const API_URL = "http://localhost:4000/api"; // Importante colocar la url de tu api
 
 export const api = {
+
   get: async (endpoint) => {
     try {
       const response = await fetch(`${API_URL}${endpoint}`);
