@@ -9,6 +9,10 @@ const Sidebar = () => {
         : 'text-slate-400 hover:bg-slate-800 hover:text-white'
     }`;
 
+const BotonSalir = () => {
+  localStorage.removeItem('token');
+  window.location.href = '/login';
+}
   return (
     <div className="w-64 h-screen bg-slate-900 text-white fixed left-0 top-0 flex flex-col shadow-xl z-50">
       {/* Header */}
@@ -31,8 +35,9 @@ const Sidebar = () => {
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-700">
-        <button className="flex items-center gap-3 text-red-400 hover:text-red-300 hover:bg-slate-800 w-full px-4 py-3 rounded-lg transition">
+        <button className="flex items-center gap-3 text-red-400 hover:text-red-300 hover:bg-slate-800 w-full px-4 py-3 rounded-lg transition" onClick={BotonSalir}>
           <LogOut size={20} /> Salir
+          
         </button>
       </div>
     </div>

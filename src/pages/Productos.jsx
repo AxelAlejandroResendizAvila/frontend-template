@@ -1,4 +1,3 @@
-//Admin Pro inventario
 import { api } from "../services/api";
 import { useState, useEffect } from "react";
 

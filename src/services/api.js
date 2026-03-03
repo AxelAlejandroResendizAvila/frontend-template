@@ -12,7 +12,6 @@ export const api = {
       throw error;
     }
   },
-
   
   post: async (endpoint, body) => {
     try {
