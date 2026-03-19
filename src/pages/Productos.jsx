@@ -14,7 +14,8 @@ const Productos = () => {
         precio: '',
         stock: '',
         categoria: '',
-        imagen_url: ''
+        imagen_url: '',
+        youtube_id: ''
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -66,7 +67,8 @@ const Productos = () => {
                 precio: parseFloat(formData.precio),
                 stock: parseInt(formData.stock) || 0,
                 categoria: formData.categoria,
-                imagen_url: formData.imagen_url
+                imagen_url: formData.imagen_url,
+                youtube_id: formData.youtube_id
             });
 
             console.log('Producto creado:', resultado);
@@ -78,7 +80,9 @@ const Productos = () => {
                 precio: '',
                 stock: '',
                 categoria: '',
-                imagen_url: ''
+                imagen_url: '',
+                youtube_id: ''
+
             });
 
             // Cerrar formulario
@@ -203,6 +207,20 @@ const Productos = () => {
                                         placeholder="URL de la imagen del producto"
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-slate-700 font-medium mb-2" htmlFor="youtube_id">
+                                        ID de YouTube
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="youtube_id"
+                                        value={formData.youtube_id}
+                                        onChange={handleInputChange}
+                                        className="w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="ID del video de YouTube relacionado"
+                                    />
+                                </div>
+
                             </div>
                         </div>
 
@@ -239,6 +257,21 @@ const Productos = () => {
                             <p className="text-green-600 font-bold mt-4">${producto.precio}</p>
                             <p className="text-slate-600 mt-1">Stock: {producto.stock}</p>
                             <p className="text-slate-600 mt-1">Categoría: {producto.categoria}</p>
+                            {producto.youtube_id ? (
+                                <iframe
+                                width="100%"
+                                height="100%"
+                                    className="w-full h-48 mt-4 rounded-md"
+                                    src={`https://www.youtube.com/embed/${producto.youtube_id}`}
+                                    title="Video de YouTube"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+
+                            ) : (
+                                <img src={producto.imagen_url || "https://via.placeholder.com/150"} alt={producto.nombre} className="w-full h-48 object-cover rounded-md mt-4" />
+                            )}
                         </div>
                     ))}
                 </div>
