@@ -1,6 +1,51 @@
 import { api } from "../services/api";
 import { useState, useEffect } from "react";
 
+const getYouTubeId = (value) => {
+    if (!value) return "";
+
+    const input = String(value).trim();
+    const idPattern = /^[a-zA-Z0-9_-]{11}$/;
+
+    const rawCandidate = input
+        .replace(/^v=/, "")
+        .replace(/^watch\?v=/, "")
+        .split("&")[0]
+        .trim();
+
+    if (idPattern.test(rawCandidate)) {
+        return rawCandidate;
+    }
+
+    if (idPattern.test(input)) {
+        return input;
+    }
+
+    try {
+        const url = new URL(input);
+
+        if (url.hostname.includes("youtu.be")) {
+            const shortId = url.pathname.split("/").filter(Boolean)[0] || "";
+            return idPattern.test(shortId) ? shortId : "";
+        }
+
+        if (url.hostname.includes("youtube.com")) {
+            const videoIdFromQuery = url.searchParams.get("v") || "";
+            if (idPattern.test(videoIdFromQuery)) return videoIdFromQuery;
+
+            const pathParts = url.pathname.split("/").filter(Boolean);
+            const shortsOrEmbedId = pathParts[pathParts.length - 1] || "";
+            if (["shorts", "embed"].includes(pathParts[0]) && idPattern.test(shortsOrEmbedId)) {
+                return shortsOrEmbedId;
+            }
+        }
+    } catch {
+        return "";
+    }
+
+    return "";
+};
+
 const Productos = () => {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -59,6 +104,7 @@ const Productos = () => {
         try {
             setSubmitting(true);
             setError(null);
+            const youtubeId = getYouTubeId(formData.youtube_id);
             
             // Llamada al endpoint POST
             const resultado = await api.post('/productos/crear', {
@@ -68,7 +114,7 @@ const Productos = () => {
                 stock: parseInt(formData.stock) || 0,
                 categoria: formData.categoria,
                 imagen_url: formData.imagen_url,
-                youtube_id: formData.youtube_id
+                youtube_id: youtubeId
             });
 
             console.log('Producto creado:', resultado);
@@ -209,7 +255,7 @@ const Productos = () => {
                                 </div>
                                 <div>
                                     <label className="block text-slate-700 font-medium mb-2" htmlFor="youtube_id">
-                                        ID de YouTube
+                                        URL o ID de YouTube
                                     </label>
                                     <input
                                         type="text"
@@ -217,7 +263,7 @@ const Productos = () => {
                                         value={formData.youtube_id}
                                         onChange={handleInputChange}
                                         className="w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="ID del video de YouTube relacionado"
+                                        placeholder="https://youtu.be/... o ID del video"
                                     />
                                 </div>
 
@@ -249,20 +295,17 @@ const Productos = () => {
             
             {!loading && !error && (
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {productos.map((producto) => (
-                        <div key={producto.id} className="border rounded-lg p-4 shadow-sm hover:shadow-md transition">
-                            <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-48 object-cover rounded-md mb-4" />
-                            <h2 className="text-xl font-semibold text-slate-800">{producto.nombre}</h2>
-                            <p className="text-slate-600 mt-2">{producto.descripcion}</p>
-                            <p className="text-green-600 font-bold mt-4">${producto.precio}</p>
-                            <p className="text-slate-600 mt-1">Stock: {producto.stock}</p>
-                            <p className="text-slate-600 mt-1">Categoría: {producto.categoria}</p>
-                            {producto.youtube_id ? (
+                    {productos.map((producto) => {
+                        const youtubeId = getYouTubeId(producto.youtube_id);
+
+                        return (
+                            <div key={producto.id} className="border rounded-lg p-4 shadow-sm hover:shadow-md transition">
+                            {youtubeId ? (
                                 <iframe
                                 width="100%"
                                 height="100%"
-                                    className="w-full h-48 mt-4 rounded-md"
-                                    src={`https://www.youtube.com/embed/${producto.youtube_id}`}
+                                    className="w-full h-48 rounded-md mb-4"
+                                    src={`https://www.youtube.com/embed/${youtubeId}`}
                                     title="Video de YouTube"
                                     frameBorder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -270,10 +313,16 @@ const Productos = () => {
                                 />
 
                             ) : (
-                                <img src={producto.imagen_url || "https://via.placeholder.com/150"} alt={producto.nombre} className="w-full h-48 object-cover rounded-md mt-4" />
+                                <img src={producto.imagen_url || "https://via.placeholder.com/150"} alt={producto.nombre} className="w-full h-48 object-cover rounded-md mb-4" />
                             )}
-                        </div>
-                    ))}
+                            <h2 className="text-xl font-semibold text-slate-800">{producto.nombre}</h2>
+                            <p className="text-slate-600 mt-2">{producto.descripcion}</p>
+                            <p className="text-green-600 font-bold mt-4">${producto.precio}</p>
+                            <p className="text-slate-600 mt-1">Stock: {producto.stock}</p>
+                            <p className="text-slate-600 mt-1">Categoría: {producto.categoria}</p>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
             

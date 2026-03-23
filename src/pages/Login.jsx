@@ -66,17 +66,19 @@ const Login = () => {
             navigate("/dashboard");
         } catch (err) {
             console.error("Error en autenticación:", err);
+            const status = err.status;
+            const message = err.data?.message || err.message || "";
             
             // Manejar errores específicos del servidor
-            if (err.response?.status === 401) {
+            if (status === 401) {
                 setError("Email o contraseña incorrectos");
                 setPasswordError("Contraseña incorrecta");
-            } else if (err.response?.data?.message === "Usuario no encontrado") {
+            } else if (message === "Usuario no encontrado") {
                 setError("El email no está registrado");
                 setEmailError("Email no encontrado");
-            } else if (err.response?.data?.message?.includes("contraseña")) {
+            } else if (message.toLowerCase().includes("contraseña")) {
                 setPasswordError("La contraseña es incorrecta");
-            } else if (err.response?.status === 400) {
+            } else if (status === 400) {
                 setError("Datos inválidos. Verifica tu email y contraseña");
             } else {
                 setError("Error al conectar con el servidor. Intenta más tarde");
